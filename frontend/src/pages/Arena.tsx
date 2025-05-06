@@ -61,27 +61,49 @@ export const Arena = ({ config }: ArenaProps) => {
   useEffect(() => {
     const ciclo = async () => {
       if (!emDuelo) return;
-
       if (config.rodadas !== null && turnoAtual > config.rodadas * 2 - 1) return;
 
-      await new Promise((r) => setTimeout(r, 2000)); // Delay de 2s
+      // Adiciona "..." como se a IA estivesse digitando
+      const autor = iaAtual.current;
+      const loadingMsg: Mensagem = { autor, texto: "..." };
+      setMensagens((prev) => [...prev, loadingMsg]);
 
-      const resposta = await fetch("http://localhost:3001/api/next-turn", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          config,
-          historico: mensagens,
-          autor: iaAtual.current,
-        }),
-      });
+      // Espera 2 segundos antes de buscar a resposta real
+      await new Promise((r) => setTimeout(r, 2000));
 
-      const dados = await resposta.json();
-      if (dados.mensagem) {
-        setMensagens((msgs) => [...msgs, dados.mensagem]);
-        iaAtual.current =
-          iaAtual.current === config.modelo1 ? config.modelo2 : config.modelo1;
-        setTurnoAtual((prev) => prev + 1);
+      try {
+        const resposta = await fetch("http://localhost:3001/api/next-turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            config,
+            historico: mensagens,
+            autor,
+          }),
+        });
+
+        const dados = await resposta.json();
+        if (dados.mensagem) {
+          // Substitui o "..." pela mensagem real
+          setMensagens((prev) => [
+            ...prev.slice(0, -1),
+            dados.mensagem,
+          ]);
+
+          // Alterna IA e próxima rodada
+          iaAtual.current =
+            iaAtual.current === config.modelo1 ? config.modelo2 : config.modelo1;
+          setTurnoAtual((prev) => prev + 1);
+        }
+      } catch (e) {
+        console.error("Erro no ciclo:", e);
+        setMensagens((prev) => [
+          ...prev.slice(0, -1),
+          {
+            autor,
+            texto: "❌ Erro ao contatar o servidor.",
+          },
+        ]);
       }
     };
 

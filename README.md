@@ -1,6 +1,6 @@
 ﻿# 🧠 Rinha de IAs
 
-Aplicação web que simula embates entre agentes de IA em diferentes temas, estilos e rodadas, com visual fluido e controle do usuário.
+Aplicação web que simula embates entre agentes de IA com temas, estilos e limites definidos pelo usuário. Com visual em estilo de chat, alternância automática entre os modelos e ritmo de digitação simulada.
 
 ---
 
@@ -20,10 +20,12 @@ Rinha-de-IAs/
 
 ## 🚧 Histórico de Versões
 
-| Versão   | Data       | Descrição                       |
-|----------|------------|----------------------------------|
-| v0.1.0   | 2024-05-06 | Estrutura inicial e documentação |
-| v0.2.0   | Em breve   | Setup React + Express            |
+| Versão   | Data       | Descrição                                                    |
+|----------|------------|---------------------------------------------------------------|
+| v0.1.0   | 2024-05-06 | Estrutura inicial do projeto + diretórios base                |
+| v0.2.0   | 2024-05-06 | Integração inicial entre frontend e backend + primeira fala   |
+| v0.3.0   | 2024-05-06 | Ciclo automático entre IAs (modo limitado ou infinito)        |
+| v0.4.0   | 2024-05-06 | Simulação de digitação com mensagens de carregamento dinâmico |
 
 ---
 
@@ -33,17 +35,18 @@ Rinha-de-IAs/
 |------------|--------------------|
 | Frontend   | React + Tailwind   |
 | Backend    | Node.js + Express  |
-| LLMs       | OpenAI GPT (v1), multi-modelo (v2) |
+| LLMs       | Simulação (v0.4.0), GPT & Multi-model (planejado p/ v1.0) |
 | Deploy     | Vercel (frontend), Render (backend) |
 
 ---
 
 ## 🚀 Features do MVP
 
-- [x] Configuração de duelo (tema, estilo, rodadas)
-- [x] Arena com mensagens alternadas
-- [x] Botão "Parar"
-- [x] Tela de encerramento com votação
+- [x] Configuração de duelo (tema, estilo, IA1, IA2, modo)
+- [x] Execução de duelo com alternância automática
+- [x] Modo infinito ou por rodadas
+- [x] Simulação de digitação
+- [x] Botão "Parar Duelo"
 
 ---
 
@@ -58,5 +61,5 @@ npm run dev
 # Rodar backend
 cd backend
 npm install
-npm run dev
+node server.js
 ```
