@@ -7,9 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Rota raiz
 app.get('/', (req, res) => {
   res.send('🧠 Backend da Rinha de IAs rodando!');
 });
+
+// Importa e usa rotas da Rinha
+const fightRoutes = require('./routes/fight');
+app.use('/api', fightRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

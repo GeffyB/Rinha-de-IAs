@@ -8,7 +8,7 @@ interface ConfiguradorProps {
   onStart: (config: {
     tema: string;
     estilo: string;
-    rodadas: number;
+    rodadas: number | null;
     modelo1: string;
     modelo2: string;
   }) => void;
@@ -18,11 +18,18 @@ export const ConfiguradorDoDuelo = ({ onStart }: ConfiguradorProps) => {
   const [tema, setTema] = useState("");
   const [estilo, setEstilo] = useState(estilos[0]);
   const [rodadas, setRodadas] = useState(5);
+  const [modoInfinito, setModoInfinito] = useState(false);
   const [modelo1, setModelo1] = useState(modelos[0]);
   const [modelo2, setModelo2] = useState(modelos[1]);
 
   const iniciarDuelo = () => {
-    onStart({ tema, estilo, rodadas, modelo1, modelo2 });
+    onStart({
+      tema,
+      estilo,
+      rodadas: modoInfinito ? null : rodadas,
+      modelo1,
+      modelo2,
+    });
   };
 
   return (
@@ -61,7 +68,17 @@ export const ConfiguradorDoDuelo = ({ onStart }: ConfiguradorProps) => {
           max={30}
           value={rodadas}
           onChange={(e) => setRodadas(parseInt(e.target.value))}
+          disabled={modoInfinito}
         />
+        <label className="block mt-2">
+          <input
+            type="checkbox"
+            className="mr-2"
+            checked={modoInfinito}
+            onChange={(e) => setModoInfinito(e.target.checked)}
+          />
+          Modo Infinito (só para quando clicar em "Parar Duelo")
+        </label>
       </div>
 
       <div>

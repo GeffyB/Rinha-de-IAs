@@ -6,7 +6,7 @@ import { Arena } from "./pages/Arena";
 interface ConfiguracaoDuelo {
   tema: string;
   estilo: string;
-  rodadas: number;
+  rodadas: number | null;
   modelo1: string;
   modelo2: string;
 }

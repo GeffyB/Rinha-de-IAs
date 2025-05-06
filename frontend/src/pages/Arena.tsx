@@ -1,5 +1,5 @@
 // frontend/src/pages/Arena.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 interface Mensagem {
   autor: string;
@@ -10,7 +10,7 @@ interface ArenaProps {
   config: {
     tema: string;
     estilo: string;
-    rodadas: number;
+    rodadas: number | null;
     modelo1: string;
     modelo2: string;
   };
@@ -19,6 +19,9 @@ interface ArenaProps {
 export const Arena = ({ config }: ArenaProps) => {
   const [mensagens, setMensagens] = useState<Mensagem[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [turnoAtual, setTurnoAtual] = useState(1);
+  const [emDuelo, setEmDuelo] = useState(true);
+  const iaAtual = useRef(config.modelo1);
 
   useEffect(() => {
     const iniciarDuelo = async () => {
@@ -30,12 +33,9 @@ export const Arena = ({ config }: ArenaProps) => {
         });
 
         const dados = await resposta.json();
-        console.log("📥 Resposta recebida do backend:", dados);
-
         if (Array.isArray(dados.mensagens)) {
           setMensagens(dados.mensagens);
         } else {
-          console.warn("⚠️ Formato inesperado de resposta:", dados);
           setMensagens([
             {
               autor: config.modelo1,
@@ -44,7 +44,6 @@ export const Arena = ({ config }: ArenaProps) => {
           ]);
         }
       } catch (erro) {
-        console.error("❌ Erro ao iniciar duelo:", erro);
         setMensagens([
           {
             autor: config.modelo1,
@@ -59,7 +58,38 @@ export const Arena = ({ config }: ArenaProps) => {
     iniciarDuelo();
   }, [config]);
 
+  useEffect(() => {
+    const ciclo = async () => {
+      if (!emDuelo) return;
+
+      if (config.rodadas !== null && turnoAtual > config.rodadas * 2 - 1) return;
+
+      await new Promise((r) => setTimeout(r, 2000)); // Delay de 2s
+
+      const resposta = await fetch("http://localhost:3001/api/next-turn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          config,
+          historico: mensagens,
+          autor: iaAtual.current,
+        }),
+      });
+
+      const dados = await resposta.json();
+      if (dados.mensagem) {
+        setMensagens((msgs) => [...msgs, dados.mensagem]);
+        iaAtual.current =
+          iaAtual.current === config.modelo1 ? config.modelo2 : config.modelo1;
+        setTurnoAtual((prev) => prev + 1);
+      }
+    };
+
+    if (!carregando) ciclo();
+  }, [mensagens, carregando, config, emDuelo, turnoAtual]);
+
   const pararDuelo = () => {
+    setEmDuelo(false);
     console.log("⛔ Duelo interrompido.");
   };
 
