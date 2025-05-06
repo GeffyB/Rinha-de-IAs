@@ -1,0 +1,1 @@
+﻿## 🤖 Exemplos de Prompts
