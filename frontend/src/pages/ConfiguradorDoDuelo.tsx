@@ -4,7 +4,17 @@ import React, { useState } from "react";
 const estilos = ["Filosófico", "Rima", "Factual", "Sarcasmo", "Livre"];
 const modelos = ["GPT-4", "DeepSeek", "Claude", "LLaMA", "Gemini"];
 
-export const ConfiguradorDoDuelo = () => {
+interface ConfiguradorProps {
+  onStart: (config: {
+    tema: string;
+    estilo: string;
+    rodadas: number;
+    modelo1: string;
+    modelo2: string;
+  }) => void;
+}
+
+export const ConfiguradorDoDuelo = ({ onStart }: ConfiguradorProps) => {
   const [tema, setTema] = useState("");
   const [estilo, setEstilo] = useState(estilos[0]);
   const [rodadas, setRodadas] = useState(5);
@@ -12,14 +22,7 @@ export const ConfiguradorDoDuelo = () => {
   const [modelo2, setModelo2] = useState(modelos[1]);
 
   const iniciarDuelo = () => {
-    const configuracao = {
-      tema,
-      estilo,
-      rodadas,
-      modelo1,
-      modelo2,
-    };
-    console.log("🧠 Configuração do duelo:", configuracao);
+    onStart({ tema, estilo, rodadas, modelo1, modelo2 });
   };
 
   return (
