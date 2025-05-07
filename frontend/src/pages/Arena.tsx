@@ -8,11 +8,16 @@ interface Mensagem {
 
 interface ArenaProps {
   config: {
-    tema: string;
-    estilo: string;
+    tema1: string;
+    tema2: string;
+    estilo1: string;
+    estilo2: string;
+    sincronizarEstilos: boolean;
     rodadas: number | null;
+    modoInfinito: boolean;
     modelo1: string;
     modelo2: string;
+    quemComeca: "modelo1" | "modelo2" | "aleatorio";
   };
 }
 
@@ -21,9 +26,17 @@ export const Arena = ({ config }: ArenaProps) => {
   const [carregando, setCarregando] = useState(true);
   const [turnoAtual, setTurnoAtual] = useState(1);
   const [emDuelo, setEmDuelo] = useState(true);
-  const iaAtual = useRef(config.modelo1);
+  const iaAtual = useRef<string>("");
 
   useEffect(() => {
+    // Define quem começa
+    iaAtual.current =
+      config.quemComeca === "aleatorio"
+        ? Math.random() < 0.5 ? config.modelo1 : config.modelo2
+        : config.quemComeca === "modelo1"
+        ? config.modelo1
+        : config.modelo2;
+
     const iniciarDuelo = async () => {
       try {
         const resposta = await fetch("http://localhost:3001/api/start-fight", {
@@ -38,7 +51,7 @@ export const Arena = ({ config }: ArenaProps) => {
         } else {
           setMensagens([
             {
-              autor: config.modelo1,
+              autor: iaAtual.current,
               texto: "⚠️ Não foi possível carregar a resposta inicial.",
             },
           ]);
@@ -46,7 +59,7 @@ export const Arena = ({ config }: ArenaProps) => {
       } catch (erro) {
         setMensagens([
           {
-            autor: config.modelo1,
+            autor: iaAtual.current,
             texto: "❌ Erro ao contatar o servidor.",
           },
         ]);
@@ -59,18 +72,26 @@ export const Arena = ({ config }: ArenaProps) => {
   }, [config]);
 
   useEffect(() => {
-    const ciclo = async () => {
-      if (!emDuelo) return;
-      if (config.rodadas !== null && turnoAtual > config.rodadas * 2 - 1) return;
+    if (carregando || !emDuelo) return;
 
-      // Adiciona "..." como se a IA estivesse digitando
-      const autor = iaAtual.current;
-      const loadingMsg: Mensagem = { autor, texto: "..." };
-      setMensagens((prev) => [...prev, loadingMsg]);
+    if (config.rodadas !== null && turnoAtual > config.rodadas * 2) {
+      setEmDuelo(false);
+      setMensagens((prev) => [
+        ...prev,
+        {
+          autor: "🧠 Sistema",
+          texto: `🎉 Duelo encerrado automaticamente após ${config.rodadas} rodadas.`,
+        },
+      ]);
+      return;
+    }
 
-      // Espera 2 segundos antes de buscar a resposta real
-      await new Promise((r) => setTimeout(r, 2000));
+    const autor = iaAtual.current;
 
+    const loadingMsg: Mensagem = { autor, texto: "..." };
+    setMensagens((prev) => [...prev, loadingMsg]);
+
+    const timeout = setTimeout(async () => {
       try {
         const resposta = await fetch("http://localhost:3001/api/next-turn", {
           method: "POST",
@@ -84,15 +105,13 @@ export const Arena = ({ config }: ArenaProps) => {
 
         const dados = await resposta.json();
         if (dados.mensagem) {
-          // Substitui o "..." pela mensagem real
-          setMensagens((prev) => [
-            ...prev.slice(0, -1),
-            dados.mensagem,
-          ]);
-
-          // Alterna IA e próxima rodada
+          setMensagens((prev) => [...prev.slice(0, -1), dados.mensagem]);
+          // Alterna IA
           iaAtual.current =
-            iaAtual.current === config.modelo1 ? config.modelo2 : config.modelo1;
+            iaAtual.current === config.modelo1
+              ? config.modelo2
+              : config.modelo1;
+
           setTurnoAtual((prev) => prev + 1);
         }
       } catch (e) {
@@ -105,21 +124,28 @@ export const Arena = ({ config }: ArenaProps) => {
           },
         ]);
       }
-    };
+    }, 2000);
 
-    if (!carregando) ciclo();
-  }, [mensagens, carregando, config, emDuelo, turnoAtual]);
+    return () => clearTimeout(timeout);
+  }, [turnoAtual, carregando, emDuelo, config]);
 
   const pararDuelo = () => {
     setEmDuelo(false);
-    console.log("⛔ Duelo interrompido.");
+    setMensagens((prev) => [
+      ...prev,
+      {
+        autor: "🧠 Sistema",
+        texto: "⛔ Duelo interrompido manualmente.",
+      },
+    ]);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-6">
       <h1 className="text-2xl font-bold text-center mb-4">🧠 Arena de IAs</h1>
       <h2 className="text-center text-gray-600 mb-6">
-        Tema: <strong>{config.tema}</strong> | Estilo: <strong>{config.estilo}</strong>
+        <strong>{config.modelo1}</strong> vs <strong>{config.modelo2}</strong> —{" "}
+        <em>{config.tema1}</em> vs <em>{config.tema2}</em>
       </h2>
 
       <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-4 space-y-4 min-h-[200px]">
@@ -132,7 +158,9 @@ export const Arena = ({ config }: ArenaProps) => {
               className={`p-3 rounded-lg w-fit max-w-[80%] ${
                 msg.autor === config.modelo1
                   ? "bg-blue-100 self-start"
-                  : "bg-green-100 self-end ml-auto"
+                  : msg.autor === config.modelo2
+                  ? "bg-green-100 self-end ml-auto"
+                  : "bg-gray-200 mx-auto"
               }`}
             >
               <p className="text-sm text-gray-700 font-semibold mb-1">{msg.autor}</p>

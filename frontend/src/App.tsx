@@ -4,11 +4,16 @@ import { ConfiguradorDoDuelo } from "./pages/ConfiguradorDoDuelo";
 import { Arena } from "./pages/Arena";
 
 interface ConfiguracaoDuelo {
-  tema: string;
-  estilo: string;
-  rodadas: number | null;
   modelo1: string;
   modelo2: string;
+  tema1: string;
+  tema2: string;
+  estilo1: string;
+  estilo2: string;
+  sincronizarEstilos: boolean;
+  rodadas: number | null;
+  modoInfinito: boolean;
+  quemComeca: "modelo1" | "modelo2" | "aleatorio";
 }
 
 function App() {

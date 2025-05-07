@@ -1,0 +1,13 @@
+{
+    "modelo1": "GPT-4",
+    "modelo2": "DeepSeek",
+    "tema1": "Água",
+    "tema2": "Suco",
+    "estilo1": "Filosófico",
+    "estilo2": "Filosófico",
+    "sincronizarEstilos": true,
+    "rodadas": 5,
+    "modoInfinito": false,
+    "quemComeca": "modelo1"
+  }
+  
