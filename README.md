@@ -10,6 +10,7 @@ Aplicação web que simula embates entre agentes de IA com temas, estilos e limi
 Rinha-de-IAs/
 ├── frontend/      # Aplicação React (UI da arena e configuração)
 ├── backend/       # API Node.js + Express para orquestração de turnos
+├── test/          # JSONs de exemplo para teste via Postman ou CLI
 ├── docs/          # Memória, roadmap, exemplos de prompt e arquitetura
 ├── .gitignore
 ├── LICENSE
@@ -20,12 +21,13 @@ Rinha-de-IAs/
 
 ## 🚧 Histórico de Versões
 
-| Versão   | Data       | Descrição                                                    |
-|----------|------------|---------------------------------------------------------------|
-| v0.1.0   | 2024-05-06 | Estrutura inicial do projeto + diretórios base                |
-| v0.2.0   | 2024-05-06 | Integração inicial entre frontend e backend + primeira fala   |
-| v0.3.0   | 2024-05-06 | Ciclo automático entre IAs (modo limitado ou infinito)        |
-| v0.4.0   | 2024-05-06 | Simulação de digitação com mensagens de carregamento dinâmico |
+| Versão   | Data       | Descrição                                                                 |
+|----------|------------|---------------------------------------------------------------------------|
+| v0.1.0   | 2024-05-06 | Estrutura inicial do projeto + diretórios base                            |
+| v0.2.0   | 2024-05-06 | Integração inicial entre frontend e backend + primeira fala               |
+| v0.3.0   | 2024-05-06 | Ciclo automático entre IAs (modo limitado ou infinito)                    |
+| v0.4.0   | 2024-05-06 | Simulação de digitação com mensagens de carregamento dinâmico             |
+| v0.5.0   | 2024-05-07 | Configurador completo (tema, estilo por IA, ordem, modo); duelo funcional |
 
 ---
 
@@ -35,18 +37,45 @@ Rinha-de-IAs/
 |------------|--------------------|
 | Frontend   | React + Tailwind   |
 | Backend    | Node.js + Express  |
-| LLMs       | Simulação (v0.4.0), GPT & Multi-model (planejado p/ v1.0) |
+| LLMs       | Simulação (v1.0.0), GPT/DeepSeek via proxy (planejado) |
 | Deploy     | Vercel (frontend), Render (backend) |
 
 ---
 
-## 🚀 Features do MVP
+## 🚀 Funcionalidades Atuais (v1.0.0)
 
-- [x] Configuração de duelo (tema, estilo, IA1, IA2, modo)
-- [x] Execução de duelo com alternância automática
-- [x] Modo infinito ou por rodadas
-- [x] Simulação de digitação
-- [x] Botão "Parar Duelo"
+- [x] Configurador completo:
+  - IA1 e IA2 com seletores
+  - Temas independentes para cada IA
+  - Estilos sincronizáveis ou independentes
+  - Escolha de quem começa
+- [x] Ciclo automático de mensagens por turno
+- [x] Controle de rodadas finitas ou modo infinito
+- [x] Encerramento automático ao fim das rodadas
+- [x] Mensagem do sistema no fim ou interrupção
+- [x] Botão de "Parar Duelo"
+- [x] JSON de teste no diretório `/test`
+
+---
+
+## 🧭 Funcionalidades Planejadas
+
+- [ ] Integração com DeepSeek ou GPT via SDK/API
+- [ ] Logs e replays dos duelos
+- [ ] Votação para decidir o vencedor
+- [ ] IA julgadora (modo 3º agente)
+- [ ] Histórico persistente (Firestore ou Supabase)
+
+---
+
+## 🧪 Teste Local da API
+
+```bash
+# Enviar requisição de teste no Postman:
+POST http://localhost:3001/api/start-fight
+Body: raw → JSON
+Conteúdo: veja arquivo /test/fight-example.json
+```
 
 ---
 
