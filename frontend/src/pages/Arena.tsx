@@ -1,4 +1,3 @@
-// frontend/src/pages/Arena.tsx
 import React, { useEffect, useState, useRef } from "react";
 
 interface Mensagem {
@@ -27,12 +26,14 @@ export const Arena = ({ config }: ArenaProps) => {
   const [turnoAtual, setTurnoAtual] = useState(1);
   const [emDuelo, setEmDuelo] = useState(true);
   const iaAtual = useRef<string>("");
+  const executandoTurno = useRef(false); // Novo controle de reentrada
 
   useEffect(() => {
-    // Define quem começa
     iaAtual.current =
       config.quemComeca === "aleatorio"
-        ? Math.random() < 0.5 ? config.modelo1 : config.modelo2
+        ? Math.random() < 0.5
+          ? config.modelo1
+          : config.modelo2
         : config.quemComeca === "modelo1"
         ? config.modelo1
         : config.modelo2;
@@ -72,7 +73,11 @@ export const Arena = ({ config }: ArenaProps) => {
   }, [config]);
 
   useEffect(() => {
-    if (carregando || !emDuelo) return;
+    console.log("🧪 useEffect do próximo turno acionado");
+    console.log("📌 Estado → carregando:", carregando, "| emDuelo:", emDuelo, "| turno:", turnoAtual);
+    console.log("📨 Histórico:", mensagens.map((m) => `${m.autor}: ${m.texto}`).join(" | "));
+
+    if (carregando || !emDuelo || executandoTurno.current) return;
 
     if (config.rodadas !== null && turnoAtual > config.rodadas * 2) {
       setEmDuelo(false);
@@ -86,8 +91,9 @@ export const Arena = ({ config }: ArenaProps) => {
       return;
     }
 
-    const autor = iaAtual.current;
+    executandoTurno.current = true;
 
+    const autor = iaAtual.current;
     const loadingMsg: Mensagem = { autor, texto: "..." };
     setMensagens((prev) => [...prev, loadingMsg]);
 
@@ -104,18 +110,18 @@ export const Arena = ({ config }: ArenaProps) => {
         });
 
         const dados = await resposta.json();
+        console.log("📥 Resposta da IA:", dados);
+
         if (dados.mensagem) {
           setMensagens((prev) => [...prev.slice(0, -1), dados.mensagem]);
-          // Alterna IA
           iaAtual.current =
             iaAtual.current === config.modelo1
               ? config.modelo2
               : config.modelo1;
-
           setTurnoAtual((prev) => prev + 1);
         }
       } catch (e) {
-        console.error("Erro no ciclo:", e);
+        console.error("❌ Erro no ciclo de turno:", e);
         setMensagens((prev) => [
           ...prev.slice(0, -1),
           {
@@ -123,11 +129,13 @@ export const Arena = ({ config }: ArenaProps) => {
             texto: "❌ Erro ao contatar o servidor.",
           },
         ]);
+      } finally {
+        executandoTurno.current = false;
       }
     }, 2000);
 
     return () => clearTimeout(timeout);
-  }, [turnoAtual, carregando, emDuelo, config]);
+  }, [turnoAtual, carregando, emDuelo, config]); // Removido 'mensagens' para evitar ciclo
 
   const pararDuelo = () => {
     setEmDuelo(false);

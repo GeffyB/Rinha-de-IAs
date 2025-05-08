@@ -28,6 +28,7 @@ Rinha-de-IAs/
 | v0.3.0   | 2024-05-06 | Ciclo automático entre IAs (modo limitado ou infinito)                    |
 | v0.4.0   | 2024-05-06 | Simulação de digitação com mensagens de carregamento dinâmico             |
 | v0.5.0   | 2024-05-07 | Configurador completo (tema, estilo por IA, ordem, modo); duelo funcional |
+| v0.6.0   | 2024-05-07 | Integração com OpenRouter (GPT-4/DeepSeek) e respostas reais no frontend  |
 
 ---
 
@@ -37,12 +38,12 @@ Rinha-de-IAs/
 |------------|--------------------|
 | Frontend   | React + Tailwind   |
 | Backend    | Node.js + Express  |
-| LLMs       | Simulação (v1.0.0), GPT/DeepSeek via proxy (planejado) |
+| LLMs       | OpenRouter (GPT-4, DeepSeek) via proxy REST |
 | Deploy     | Vercel (frontend), Render (backend) |
 
 ---
 
-## 🚀 Funcionalidades Atuais (v1.0.0)
+## 🚀 Funcionalidades Atuais (v0.6.0)
 
 - [x] Configurador completo:
   - IA1 e IA2 com seletores
@@ -51,16 +52,22 @@ Rinha-de-IAs/
   - Escolha de quem começa
 - [x] Ciclo automático de mensagens por turno
 - [x] Controle de rodadas finitas ou modo infinito
-- [x] Encerramento automático ao fim das rodadas
 - [x] Mensagem do sistema no fim ou interrupção
+- [x] Integração com IAs reais via OpenRouter
+- [x] Proxy backend com `.env` para chave segura
 - [x] Botão de "Parar Duelo"
 - [x] JSON de teste no diretório `/test`
+- [ ] Falta lógica para:
+  - Respostas vazias com fallback
+  - Encerramento automático com base no ciclo lógico
+  - Prompt estruturado por estilo/tema
 
 ---
 
 ## 🧭 Funcionalidades Planejadas
 
-- [ ] Integração com DeepSeek ou GPT via SDK/API
+- [ ] Respostas por IA com estilo limitado (ex: 4 frases)
+- [ ] Mensagens criativas para IA silenciosa
 - [ ] Logs e replays dos duelos
 - [ ] Votação para decidir o vencedor
 - [ ] IA julgadora (modo 3º agente)
@@ -92,3 +99,15 @@ cd backend
 npm install
 node server.js
 ```
+## ⚠️ Limitações do Plano Gratuito (OpenRouter)
+
+Este projeto usa o provedor OpenRouter para interagir com IAs como DeepSeek.
+
+Por padrão, o plano gratuito possui um limite de ~666 tokens por requisição. Para garantir funcionamento:
+
+- **Limitamos as respostas a 300 tokens**
+- Caso queira gerar respostas mais longas, será necessário:
+  - Reduzir o conteúdo do histórico (menos mensagens por chamada)
+  - Adquirir um plano pago no OpenRouter
+
+Este limite pode ser alterado em `backend/routes/proxy-ia.js`, no campo `max_tokens`.
